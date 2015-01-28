@@ -10,6 +10,7 @@ use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use UserApp\API as UserApp;
 use UserApp\Exceptions\ServiceException;
 use UserAppSymfony\Exception\NoUserRoleException;
+use UserAppSymfony\UserAppUser;
 
 class UserAppProvider implements UserProviderInterface
 {

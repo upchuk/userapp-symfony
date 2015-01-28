@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @file UserAppSymfony\UserAppUser
+ */
+
 namespace UserAppSymfony;
 
 use Symfony\Component\Security\Core\User\UserInterface;

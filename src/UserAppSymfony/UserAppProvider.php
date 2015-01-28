@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @file UserAppSymfony\UserAppProvider
+ */
+
 namespace UserAppSymfony;
 
 use Symfony\Component\Security\Core\Exception\AuthenticationException;

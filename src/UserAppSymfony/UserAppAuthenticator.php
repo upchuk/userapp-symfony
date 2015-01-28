@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @file UserAppSymfony\UserAppAuthenticator
+ */
+
 namespace UserAppSymfony;
 
 use Symfony\Component\HttpFoundation\Request;

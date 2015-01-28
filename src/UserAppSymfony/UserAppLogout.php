@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @file UserAppSymfony\UserAppLogout
+ */
+
 namespace UserAppSymfony;
 
 use Symfony\Component\HttpFoundation\Request;

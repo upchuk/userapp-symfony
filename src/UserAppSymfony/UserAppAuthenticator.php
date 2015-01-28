@@ -41,6 +41,9 @@ class UserAppAuthenticator implements SimpleFormAuthenticatorInterface
       if ($exception->getErrorCode() == 'INVALID_ARGUMENT_LOGIN' || $exception->getErrorCode() == 'INVALID_ARGUMENT_PASSWORD') {
         throw new AuthenticationException('Invalid username or password');
       }
+      if ($exception->getErrorCode() == 'INVALID_ARGUMENT_APP_ID') {
+        throw new AuthenticationException('Invalid app ID');
+      }
     }
     return new UserAppToken(
       $user,

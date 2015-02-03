@@ -5,8 +5,9 @@ with your Symfony application. For more information about Symfony security, chec
 
 * All users stored in UserApp.io can login/logout but they must have at least one permission which preferably then needs to correlate with a Symfony role.
 * User information (basic details, permissions and properties) are stored in the Symfony user session upon login to avoid calls to the API on each request. This means that this data is only refreshed in the Symfony application when the user logs back in.
-* On each request, a heartbeat is sent to the API to prolong the life of the UserApp.io token. This also means that the Symfony session gets destroyed if the UserApp.io token has expired in the meantime -> the user is forced to log back in.
-* If you lock a user in UserApp.io, the locked status of the Symfony user gets updated in the next request through the heartbeat (so the user object contains the also the locked status).
+* On each request, a heartbeat can be sent to the API to prolong the life of the UserApp.io token. This also means that the Symfony session gets destroyed if the UserApp.io token has expired in the meantime -> the user is forced to log back in.
+* You can specify if the heartbeat request should be sent on every request or after a defined number of minutes have passed since the previous one.
+* If you lock a user in UserApp.io, the locked status of the Symfony user gets updated in the next request through the heartbeat.
 
  
 ## Installation
@@ -22,67 +23,62 @@ You can install this library with composer:
 ```
 *(semver release tags will follow)*
 
-## Usage
-
 Before using this package, make sure that your UserApp.io users have at least one permission enabled. These permissions are used as roles in Symfony and are cached in the user session.
 
-Once the package is in your vendors folder, you'll need to create a few services (you can copy and paste from below in YML format):
+Once the package is in your vendors folder, you'll need to import the `services.yml` file that comes with the library. Assuming that your own `services.yml` file is located in the default `app/config` folder, add this to it:
 
 ```
-	  user_app_client:
-             class: UserApp\API
-             arguments: ["%userapp_id%"]
-      user_app_authenticator:
-             class: UserAppSymfony\UserAppAuthenticator
-             arguments: ["@user_app_client"]
-      user_app_provider:
-             class: UserAppSymfony\UserAppProvider
-             arguments: ["@user_app_client"]
-      user_app_logout:
-             class: UserAppSymfony\UserAppLogout
-             arguments: ["@user_app_client"]	
-             
+imports:
+    - { resource: '../../vendor/upchuk/userapp-symfony/services.yml' }             
  ```
+ 
+Make sure you adjust the path if your directory structure differs.
 
-The first is the user app library exposed as a service to be injected in the various classes. You can use it to make your own calls as well if you like. As an argument, a parameter (`userapp_id`) is automatically passed to it so **make sure your application contains this parameter with the value of the your UserApp.io token** (replace token with your own):
+## Configuration
 
-```
-userapp_id: 556712n864bb5
-```
+### Required
 
-The rest are services used in the Symfony authentication process.
+#### Security configuration
 
-The only thing left is your security configuration (e.g. `security.yml`):
+Edit the `security.yml` file and add the new user provider and firewall authentication provider:
 
 **The user  provider:**
 
 ```
 providers:
-        user_app:
-                id: user_app_provider
+	user_app:
+	   id: user_app_provider
 ```
 
 **The firewall**
 
 ```
 firewalls:
-        demo_secured_area:
-            pattern: ^/secured/path
-            simple_form:
-                authenticator: user_app_authenticator
-                check_path: _demo_security_check
-                login_path: _demo_login
-            logout:
-                path:   _demo_logout
-                handlers: [user_app_logout]
-                target: _demo
+	demo_secured_area:
+	    pattern: ^/secured/path
+	    simple_form:
+	        authenticator: user_app_authenticator
+	        check_path: _demo_security_check
+	        login_path: _demo_login
+	    logout:
+	        path:   _demo_logout
+	        handlers: [user_app_logout]
+	        target: _demo
 ```
 
-The `authenticator` key makes the specifies the authenticator class used within the `simple_form` type of authentication (more information [here](http://symfony.com/doc/current/cookbook/security/custom_password_authenticator.html) about this type of authentication).
+The `authenticator` key specifies the authenticator class used within the `simple_form` type of authentication (more information [here](http://symfony.com/doc/current/cookbook/security/custom_password_authenticator.html) about this type of authentication).
 
 The `handlers` key specifies the services that get instantiated and called when the user logs out (used in this case to log users out from the UserApp.io service as well).
 
-The rest is Symfony demo setup of a custom firewall. 
+The rest is Symfony demo setup of a custom firewall. Make sure you read the [documentation](http://symfony.com/doc/current/book/security.html) for more info.
+
+#### App ID
+
+You need to make sure you create a parameter inside your `parameters.yml` file called `userapp_id` that contains the App ID of your UserApp.io account
+
+### Optional
+
+You can create a parameter inside your `parameters.yml` file called `userapp_heartbeat_frequency` with which you can specify the number of minutes (in seconds) that need to pass after a heartbeat request for a new one to be made. Setting this to 0 will make it send a request on each authenticated page refresh. By default it is `2700` (45 minutes).
 
 ## Development
 

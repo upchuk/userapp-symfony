@@ -22,9 +22,10 @@ class UserAppUser implements UserInterface {
   private $permissions;
   private $created;
   private $locked;
+  private $last_logged_in;
+  private $last_heartbeat;
 
-
-  public function __construct($id, $username, $token, $firstName = null, $lastName = null, $email = null, $roles = array(), $properties = array(), $features = array(), $permissions = array(), $created = null, $locked = false)
+  public function __construct($id, $username, $token, $firstName = null, $lastName = null, $email = null, $roles = array(), $properties = array(), $features = array(), $permissions = array(), $created = null, $locked = false, $last_logged_in = null, $last_heartbeat = null)
   {
     if (empty($username)) {
       throw new \InvalidArgumentException('The username cannot be empty.');
@@ -46,6 +47,8 @@ class UserAppUser implements UserInterface {
     $this->permissions = $permissions;
     $this->created = $created;
     $this->locked = $locked;
+    $this->last_logged_in = $last_logged_in;
+    $this->last_heartbeat = $last_heartbeat;
   }
 
   /**
@@ -161,5 +164,26 @@ class UserAppUser implements UserInterface {
    */
   public function getCreated() {
     return $this->created;
+  }
+
+  /**
+   * @return null
+   */
+  public function getLastLoggedIn() {
+    return $this->last_logged_in;
+  }
+
+  /**
+   * @return mixed
+   */
+  public function getLastHeartbeat() {
+    return $this->last_heartbeat;
+  }
+
+  /**
+   * @param mixed $last_heartbeat
+   */
+  public function setLastHeartbeat($last_heartbeat) {
+    $this->last_heartbeat = $last_heartbeat;
   }
 }

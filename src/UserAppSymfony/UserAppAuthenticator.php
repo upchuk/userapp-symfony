@@ -22,6 +22,9 @@ class UserAppAuthenticator implements SimpleFormAuthenticatorInterface
    */
   private $userAppClient;
 
+  /**
+   * @param UserApp $userAppClient
+   */
   public function __construct(UserApp $userAppClient) {
     $this->userAppClient = $userAppClient;
   }

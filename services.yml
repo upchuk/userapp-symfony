@@ -1,0 +1,13 @@
+services:
+       user_app_client:
+              class: UserApp\API
+              arguments: ["%userapp_id%"]
+       user_app_authenticator:
+              class: UserAppSymfony\UserAppAuthenticator
+              arguments: ["@user_app_client"]
+       user_app_provider:
+              class: UserAppSymfony\UserAppProvider
+              arguments: ["@user_app_client", "@=container.hasParameter('userapp_heartbeat_frequency') ? parameter('userapp_heartbeat_frequency') : 2700"]
+       user_app_logout:
+              class: UserAppSymfony\UserAppLogout
+              arguments: ["@user_app_client"]

@@ -23,8 +23,18 @@ class UserAppProvider implements UserProviderInterface
    */
   private $userAppClient;
 
-  public function __construct(UserApp $userAppClient) {
+  /**
+   * @var integer
+   */
+  private $heartbeat_frequency;
+
+  /**
+   * @param UserApp $userAppClient
+   * @param $heartbeat_frequency
+   */
+  public function __construct(UserApp $userAppClient, $heartbeat_frequency) {
     $this->userAppClient = $userAppClient;
+    $this->heartbeat_frequency = $heartbeat_frequency;
   }
 
   /**
@@ -46,18 +56,23 @@ class UserAppProvider implements UserProviderInterface
       );
     }
 
-    try {
-      $api = $this->userAppClient;
-      $api->setOption('token', $user->getToken());
-      $api->token->heartbeat();
-      $user->unlock();
-    }
-    catch (ServiceException $exception) {
-      if ($exception->getErrorCode() == 'INVALID_CREDENTIALS') {
-        throw new AuthenticationException('Invalid credentials');
+    // Perform heartbeat request after X number of minutes from the previous one
+    // Defaults to 45 minutes if no userapp_heartbeat_frequency parameter is set
+    if ($user->getLastHeartbeat() == null || time() > $user->getLastHeartbeat() + $this->heartbeat_frequency) {
+      try {
+        $api = $this->userAppClient;
+        $api->setOption('token', $user->getToken());
+        $api->token->heartbeat();
+        $user->unlock();
+        $user->setLastHeartbeat(time());
       }
-      if ($exception->getErrorCode() == 'AUTHORIZATION_USER_LOCKED') {
-        $user->lock();
+      catch (ServiceException $exception) {
+        if ($exception->getErrorCode() == 'INVALID_CREDENTIALS') {
+          throw new AuthenticationException('Invalid credentials');
+        }
+        if ($exception->getErrorCode() == 'AUTHORIZATION_USER_LOCKED') {
+          $user->lock();
+        }
       }
     }
 
@@ -121,7 +136,9 @@ class UserAppProvider implements UserProviderInterface
       $user->features,
       $user->permissions,
       $user->created_at,
-      empty($locks) ? false : true
+      empty($user->locks) ? false : true,
+      $user->last_login_at,
+      time()
     );
   }
 

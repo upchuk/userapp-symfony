@@ -11,3 +11,6 @@ services:
        user_app_logout:
               class: UserAppSymfony\UserAppLogout
               arguments: ["@user_app_client"]
+       user_app_password_change:
+              class: UserAppSymfony\Password\ChangePassword
+              arguments: ["@user_app_client", "@security.token_storage", "@=container.hasParameter('userapp_admin_token') ? parameter('userapp_admin_token') : NULL"]

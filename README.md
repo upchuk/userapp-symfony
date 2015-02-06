@@ -78,7 +78,63 @@ You need to make sure you create a parameter inside your `parameters.yml` file c
 
 ### Optional
 
-You can create a parameter inside your `parameters.yml` file called `userapp_heartbeat_frequency` with which you can specify the number of minutes (in seconds) that need to pass after a heartbeat request for a new one to be made. Setting this to 0 will make it send a request on each authenticated page refresh. By default it is `2700` (45 minutes).
+**Parameters**
+
+```
+userapp_heartbeat_frequency: ~
+```
+
+With this you can specify the number of minutes (in seconds) that need to pass after a heartbeat request, for a new one to be made. Setting this to 0 will make it send a request on each authenticated page refresh. By default it is `2700` (45 minutes).
+
+```
+userapp_admin_token: ~
+```
+
+With this you can specify your admin token from UserApp.io. This parameter **is required** if you are want to use the password reset functionality described below.
+
+**Password reset**
+
+There is a service you can use (`user_app_password_change`) to reset and/or change the password of the current user. 
+
+Example usage of resetting the current user's password and then changing it based on the resulting security token:
+
+```
+$changer = $this->get('user_app_password_change');
+try {
+    $token = $changer->resetPassword('the_username');
+    $changed = $changer->changePassword(array(
+      'token' => $token,
+      'new_password' => 'new_password',
+    ));
+}
+catch(PasswordChangeException $e) {
+    // $e->getMessage() == 'No admin token set.';
+    // $e->getMessage() == 'Invalid token.';
+    // $e->getMessage() == 'User not found.';
+}
+```
+
+The point of this technique is to provide a form where people can reset their own password by providing their username. Based on that, you can request a password change token that you can attach to a link you send users in an email. When they click on that link, you retrieve the token and use it to change the password. Standard *forgot my password* pattern.
+
+**Password change**
+
+Alternatively to resetting passwords, you can also change the currently logged in user's password:
+
+```
+$changer = $this->get('user_app_password_change');
+try {
+    $changed = $changer->changePassword(array(
+      'old_password' => 'old_password',
+      'new_password' => 'new_password',
+    ));
+}
+catch(PasswordChangeException $e) {
+    // $e->getMessage() == 'Invalid current password.';
+    // $e->getMessage() == 'User not found.';
+}
+```        
+
+Standard pattern for users to change their own passwords. For this you don't need to have an admin token set as a parameter. 
 
 ## Development
 

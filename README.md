@@ -8,6 +8,7 @@ with your Symfony application. For more information about Symfony security, chec
 * On each request, a heartbeat can be sent to the API to prolong the life of the UserApp.io token. This also means that the Symfony session gets destroyed if the UserApp.io token has expired in the meantime -> the user is forced to log back in.
 * You can specify if the heartbeat request should be sent on every request or after a defined number of minutes have passed since the previous one.
 * If you lock a user in UserApp.io, the locked status of the Symfony user gets updated in the next request through the heartbeat.
+* There is a service available that you can use to manage the password reset and change.
 
  
 ## Installation

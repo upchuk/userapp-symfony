@@ -107,7 +107,7 @@ class UserAppProvider implements UserProviderInterface
       }
     }
 
-    if (!empty($users)) {
+    if ( ! empty($users)) {
       return $this->userFromUserApp($users[0], $login->token);
     }
   }
@@ -124,22 +124,24 @@ class UserAppProvider implements UserProviderInterface
 
     $roles = $this->extractRolesFromPermissions($user);
 
-    return new UserAppUser(
-      $user->user_id,
-      $user->login,
-      $token,
-      $user->first_name,
-      $user->last_name,
-      $user->email,
-      $roles,
-      $user->properties,
-      $user->features,
-      $user->permissions,
-      $user->created_at,
-      empty($user->locks) ? false : true,
-      $user->last_login_at,
-      time()
+    $options = array(
+      'id' => $user->user_id,
+      'username' => $user->login,
+      'token' => $token,
+      'firstName' => $user->first_name,
+      'lastName' => $user->last_name,
+      'email' => $user->email,
+      'roles' => $roles,
+      'properties' => $user->properties,
+      'features' => $user->features,
+      'permissions' => $user->permissions,
+      'created' => $user->created_at,
+      'locked' => !empty($user->locks),
+      'last_logged_in' => $user->last_login_at,
+      'last_heartbeat' => time(),
     );
+
+    return new UserAppUser($options);
   }
 
   /**

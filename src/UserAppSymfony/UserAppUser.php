@@ -6,6 +6,7 @@
 
 namespace UserAppSymfony;
 
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class UserAppUser implements UserInterface {
@@ -25,30 +26,42 @@ class UserAppUser implements UserInterface {
   private $last_logged_in;
   private $last_heartbeat;
 
-  public function __construct($id, $username, $token, $firstName = null, $lastName = null, $email = null, $roles = array(), $properties = array(), $features = array(), $permissions = array(), $created = null, $locked = false, $last_logged_in = null, $last_heartbeat = null)
+  public function __construct($options)
   {
-    if (empty($username)) {
-      throw new \InvalidArgumentException('The username cannot be empty.');
-    }
+    $resolver = new OptionsResolver();
+    $this->configureOptions($resolver);
 
-    if (empty($id)) {
-      throw new \InvalidArgumentException('The id cannot be empty.');
+    $params = $resolver->resolve($options);
+    foreach ($params as $property => $value) {
+      $this->{$property} = $value;
     }
+  }
 
-    $this->id = $id;
-    $this->username = $username;
-    $this->token = $token;
-    $this->firstName = $firstName;
-    $this->lastName = $lastName;
-    $this->email = $email;
-    $this->roles = $roles;
-    $this->properties = $properties;
-    $this->features = $features;
-    $this->permissions = $permissions;
-    $this->created = $created;
-    $this->locked = $locked;
-    $this->last_logged_in = $last_logged_in;
-    $this->last_heartbeat = $last_heartbeat;
+  /**
+   * Configures the class options
+   *
+   * @param $resolver OptionsResolver
+   */
+  private function configureOptions($resolver)
+  {
+    $resolver->setDefaults(array(
+      'id' => NULL,
+      'username' => NULL,
+      'token' => NULL,
+      'firstName' => NULL,
+      'lastName' => NULL,
+      'email' => NULL,
+      'roles' => array(),
+      'properties' => array(),
+      'features' => array(),
+      'permissions' => array(),
+      'created' => NULL,
+      'locked' => NULL,
+      'last_logged_in' => NULL,
+      'last_heartbeat' => NULL,
+    ));
+
+    $resolver->setRequired(array('id', 'username'));
   }
 
   /**
@@ -186,4 +199,12 @@ class UserAppUser implements UserInterface {
   public function setLastHeartbeat($last_heartbeat) {
     $this->last_heartbeat = $last_heartbeat;
   }
+
+  /**
+   * @return mixed
+   */
+  public function getPermissions() {
+    return $this->permissions;
+  }
+
 }
